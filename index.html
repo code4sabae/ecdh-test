@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ECDH鍵交換実験 - Web Crypto API</title>
+    <script type="module">
+    import { ECDH } from "https://code4sabae.github.io/js/ECDH.js";
+    import { hex } from "https://code4sabae.github.io/js/hex.js";
+
+    window.onload = () => {
+      let keypair = null;
+      let secretkey = null;
+      generatebutton.onclick = async () => {
+        keypair = await ECDH.generateKeyPair();
+        ecdhpublickey.value = hex.fromBin(await ECDH.getPublicKey(keypair));
+      };
+      generatebutton2.onclick = async () => {
+        if (keypair == null) {
+          alert("先に、公開鍵を生成してください");
+          return;
+        }
+        secretkey = await ECDH.deriveSecretKey(keypair, hex.toBin(ecdhpublickey2.value));
+        ecdhsecretkey.value = secretkey; // await exportCryptoKey(secretkey);
+      };
+      encryptbutton.onclick = async () => {
+        if (secretkey == null) {
+          alert("先に、秘密鍵を生成してください");
+          return;
+        }
+        const ciphered = await ECDH.encryptText(secretkey, ecdhmessage.value);
+        console.log(ciphered);
+        ecdhciphertext.value = hex.fromBin(ciphered.ciphertext);
+        ecdhiv.value = hex.fromBin(ciphered.iv);
+      };
+      // Bob can use his copy to decrypt the message.
+      decryptbutton.onclick = async () => {
+        if (secretkey == null) {
+          alert("先に、秘密鍵を生成してください");
+          return;
+        }
+        const ciphertext = hex.toBin(ecdhciphertext.value);
+        const iv = hex.toBin(ecdhiv.value);
+        try {
+          const plaintext = await ECDH.decryptText(secretkey, iv, ciphertext);
+          ecdhplaintext.value = plaintext;
+        } catch (e) {
+          ecdhplaintext.value = "error!! " + e;
+        }
+      };
+    };
+    </script>
+    <style>
+    body {
+      font-family: sans-serif;
+    }
+    input[type="text"] {
+      width: 80vw;
+    }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>ECDH鍵交換実験</h1>
+        <section>
+          <input id="generatebutton" type="button" value="1. 公開鍵生成"><br>
+          <br>
+          公開鍵（相手に渡す）<br>
+          <input type="text" id="ecdhpublickey"><br>
+          相手の公開鍵（通信する相手からもらう）<br>
+          <input type="text" id="ecdhpublickey2"><br>
+          <br>
+          <input id="generatebutton2" type="button" value="2. 秘密生成"><br>
+          <br>
+          生成した秘密鍵（ネットワークには流れないけど、相手と同じ共通鍵）<br>
+          <input type="text" id="ecdhsecretkey"><br>
+          メッセージ（何か書いてください）<br>
+          <input type="text" id="ecdhmessage" value=""><br>
+          <br>
+          <input id="encryptbutton" type="button" value="3. 暗号化"><br>
+          <br>
+          IV<br>
+          <input type="text" id="ecdhiv"><br>
+          暗号化されたメッセージ（相手に渡す or 渡されたものを書く）<br>
+          <input type="text" id="ecdhciphertext"><br>
+          <br>
+          <input id="decryptbutton" type="button" value="4. 復号化"">
+          <br>
+          復号化されたメッセージ<br>
+          <input type="text" id="ecdhplaintext"><br>
+        </section>
+        <hr>
+        <div id="credit">
+          App: CC BY <a href=https://fukuno.jig.jp/3009>福野泰介の一日一創</a><br>
+          API: <a href=https://developer.mozilla.org/ja/docs/Web/API/Web_Crypto_API>Web Crypto API</a><br>
+          Reference: <a href=https://github.com/mdn/dom-examples/tree/master/web-crypto/derive-key>dom-examples/web-crypto/derive-key at master · mdn/dom-examples</a><br>
+        </div>
+    </main>
+  </body>
+</html>
