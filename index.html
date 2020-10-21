@@ -26,14 +26,14 @@
         ecdhsecretkey.value = secretkey; // await exportCryptoKey(secretkey);
       };
       encryptbutton.onclick = async () => {
-        assert(secretkey, "先に、秘密鍵を生成してください");
+        assert(secretkey, "先に、共通鍵を生成してください");
         const ciphered = await ECDH.encryptText(secretkey, ecdhmessage.value);
         console.log(ciphered);
         ecdhciphertext.value = hex.fromBin(ciphered.ciphertext);
         ecdhiv.value = hex.fromBin(ciphered.iv);
       };
       decryptbutton.onclick = async () => {
-        assert(secretkey, "先に、秘密鍵を生成してください");
+        assert(secretkey, "先に、共通鍵を生成してください");
         const ciphertext = hex.toBin(ecdhciphertext.value);
         const iv = hex.toBin(ecdhiv.value);
         try {
@@ -65,9 +65,9 @@
           相手の公開鍵（通信する相手からもらう、テストは自分の公開鍵でもOK）<br>
           <input type="text" id="ecdhpublickey2"><br>
           <br>
-          <input id="generatebutton2" type="button" value="2. 秘密生成"><br>
+          <input id="generatebutton2" type="button" value="2. 共通鍵生成"><br>
           <br>
-          生成した秘密鍵（ネットワークには流れないけど、相手と同じ共通鍵）<br>
+          生成した共通鍵（ネットワークには流れないけど、相手と同じ共通鍵です！）<br>
           <input type="text" id="ecdhsecretkey"><br>
           メッセージ（何か書いてください）<br>
           <input type="text" id="ecdhmessage" value=""><br>
