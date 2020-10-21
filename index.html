@@ -14,30 +14,26 @@
         keypair = await ECDH.generateKeyPair();
         ecdhpublickey.value = hex.fromBin(await ECDH.getPublicKey(keypair));
       };
-      generatebutton2.onclick = async () => {
-        if (keypair == null) {
-          alert("先に、公開鍵を生成してください");
-          return;
+      const assert = (chk, mes) => {
+        if (!chk) {
+          alert(mes);
+          throw new Error();
         }
+      };
+      generatebutton2.onclick = async () => {
+        assert(keypair, "先に、公開鍵を生成してください");
         secretkey = await ECDH.deriveSecretKey(keypair, hex.toBin(ecdhpublickey2.value));
         ecdhsecretkey.value = secretkey; // await exportCryptoKey(secretkey);
       };
       encryptbutton.onclick = async () => {
-        if (secretkey == null) {
-          alert("先に、秘密鍵を生成してください");
-          return;
-        }
+        assert(secretkey, "先に、秘密鍵を生成してください");
         const ciphered = await ECDH.encryptText(secretkey, ecdhmessage.value);
         console.log(ciphered);
         ecdhciphertext.value = hex.fromBin(ciphered.ciphertext);
         ecdhiv.value = hex.fromBin(ciphered.iv);
       };
-      // Bob can use his copy to decrypt the message.
       decryptbutton.onclick = async () => {
-        if (secretkey == null) {
-          alert("先に、秘密鍵を生成してください");
-          return;
-        }
+        assert(secretkey, "先に、秘密鍵を生成してください");
         const ciphertext = hex.toBin(ecdhciphertext.value);
         const iv = hex.toBin(ecdhiv.value);
         try {
@@ -66,7 +62,7 @@
           <br>
           公開鍵（相手に渡す）<br>
           <input type="text" id="ecdhpublickey"><br>
-          相手の公開鍵（通信する相手からもらう）<br>
+          相手の公開鍵（通信する相手からもらう、テストは自分の公開鍵でもOK）<br>
           <input type="text" id="ecdhpublickey2"><br>
           <br>
           <input id="generatebutton2" type="button" value="2. 秘密生成"><br>
